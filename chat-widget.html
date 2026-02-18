@@ -2,15 +2,10 @@
 <!-- Настройки -->
 <script>
   window.aiChatConfig = {
-    // Имя консультанта
     consultantName: "Консультант",
-    // Приветствие
     welcomeMessage: "Здравствуйте! Я консультант. Могу рассказать об услугах, ценах и помочь с выбором. О чем хотите спросить?",
-    // URL backend (изменить на свой сервер)
     apiUrl: "/api/chat",
-    // Цвета
     primaryColor: "#6366f1",
-    // Заголовок чата
     chatTitle: "Консультация"
   };
 </script>
@@ -38,15 +33,8 @@
   transition: transform 0.2s;
 }
 
-#ai-chat-toggle:hover {
-  transform: scale(1.05);
-}
-
-#ai-chat-toggle svg {
-  width: 28px;
-  height: 28px;
-  fill: white;
-}
+#ai-chat-toggle:hover { transform: scale(1.05); }
+#ai-chat-toggle svg { width: 28px; height: 28px; fill: white; }
 
 #ai-chat-window {
   position: absolute;
@@ -62,9 +50,7 @@
   overflow: hidden;
 }
 
-#ai-chat-window.open {
-  display: flex;
-}
+#ai-chat-window.open { display: flex; }
 
 .ai-chat-header {
   background: var(--primary-color, #6366f1);
@@ -137,9 +123,7 @@
   font-size: 14px;
 }
 
-.ai-chat-input input:focus {
-  border-color: var(--primary-color, #6366f1);
-}
+.ai-chat-input input:focus { border-color: var(--primary-color, #6366f1); }
 
 .ai-chat-input button {
   width: 44px;
@@ -153,42 +137,8 @@
   justify-content: center;
 }
 
-.ai-chat-input button:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-}
-
-.ai-chat-input button svg {
-  width: 20px;
-  height: 20px;
-  fill: white;
-}
-
-.ai-api-key-input {
-  padding: 12px 16px;
-  background: #fef3c7;
-  border-bottom: 1px solid #fcd34d;
-}
-
-.ai-api-key-input input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d97706;
-  border-radius: 8px;
-  font-size: 12px;
-  margin-bottom: 8px;
-}
-
-.ai-api-key-input button {
-  width: 100%;
-  padding: 8px;
-  background: #d97706;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
+.ai-chat-input button:disabled { background: #94a3b8; cursor: not-allowed; }
+.ai-chat-input button svg { width: 20px; height: 20px; fill: white; }
 
 .ai-typing {
   display: flex;
@@ -231,11 +181,6 @@
       <button class="ai-chat-close" onclick="closeChat()">×</button>
     </div>
     
-    <div id="api-key-section" class="ai-api-key-input" style="display: none;">
-      <input type="password" id="api-key" placeholder="Введите MiniMax API Key">
-      <button onclick="saveApiKey()">Сохранить и продолжить</button>
-    </div>
-    
     <div class="ai-chat-messages" id="chat-messages"></div>
     
     <div class="ai-chat-input">
@@ -254,42 +199,22 @@
 <script>
 (function() {
   const config = window.aiChatConfig || {};
-  const STORAGE_KEY = 'aiChat_apiKey';
   
-  let apiKey = localStorage.getItem(STORAGE_KEY);
-  
-  // Установить заголовок
   if (config.chatTitle) {
     document.getElementById('chat-title').textContent = config.chatTitle;
   }
   
-  // Показать окно
   window.toggleChat = function() {
     const win = document.getElementById('ai-chat-window');
     win.classList.toggle('open');
     
-    if (win.classList.contains('open') && !apiKey) {
-      document.getElementById('api-key-section').style.display = 'block';
-    }
-    
-    if (win.classList.contains('open') && apiKey && document.getElementById('chat-messages').children.length === 0) {
+    if (win.classList.contains('open') && document.getElementById('chat-messages').children.length === 0) {
       addMessage(config.welcomeMessage || 'Здравствуйте! Чем могу помочь?', 'assistant');
     }
   };
   
   window.closeChat = function() {
     document.getElementById('ai-chat-window').classList.remove('open');
-  };
-  
-  window.saveApiKey = function() {
-    const keyInput = document.getElementById('api-key');
-    
-    if (keyInput.value) {
-      apiKey = keyInput.value;
-      localStorage.setItem(STORAGE_KEY, apiKey);
-      document.getElementById('api-key-section').style.display = 'none';
-      addMessage(config.welcomeMessage || 'Здравствуйте! Чем могу помочь?', 'assistant');
-    }
   };
   
   window.handleKeyPress = function(e) {
@@ -301,23 +226,19 @@
     const message = input.value.trim();
     const sendBtn = document.getElementById('send-btn');
     
-    if (!message || !apiKey) return;
+    if (!message) return;
     
     addMessage(message, 'user');
     input.value = '';
     sendBtn.disabled = true;
     
-    // Показать typing индикатор
     const typingId = addTyping();
     
     try {
       const response = await fetch(config.apiUrl || '/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          apiKey: apiKey
-        })
+        body: JSON.stringify({ message: message })
       });
       
       removeTyping(typingId);
@@ -341,7 +262,7 @@
   function addMessage(text, role) {
     const container = document.getElementById('chat-messages');
     const div = document.createElement('div');
-    div.className = `ai-message ${role}`;
+    div.className = 'ai-message ' + role;
     div.textContent = text;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
