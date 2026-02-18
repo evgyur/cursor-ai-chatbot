@@ -1,6 +1,10 @@
 /**
  * AI Chat Backend - MiniMax API
  * Сгенерировано скиллом cursor-ai-chatbot
+ * 
+ * Переменные окружения:
+ * - MINIMAX_API_KEY (обязательно)
+ * - PORT (по умолчанию 3000)
  */
 
 const express = require('express');
@@ -12,9 +16,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// === НАСТРОЙКИ (вставит скилл) ===
-const API_KEY = "{{API_KEY}}";        // MiniMax API Key (только ключ, Group ID не нужен!)
-const KNOWLEDGE = `{{KNOWLEDGE}}`;   // Данные об услугах
+// API ключ из переменной окружения
+const API_KEY = process.env.MINIMAX_API_KEY;
+
+if (!API_KEY) {
+  console.error('ОШИБКА: Установи переменную MINIMAX_API_KEY');
+  process.exit(1);
+}
+
+// База знаний (вставит скилл при генерации)
+const KNOWLEDGE = process.env.KNOWLEDGE || `{{KNOWLEDGE}}`;
 
 const SYSTEM_PROMPT = `Ты консультант по услугам. 
 
@@ -38,9 +49,7 @@ async function callMiniMax(message) {
       },
       body: JSON.stringify({
         model: 'MiniMax-M2.5',
-        messages: [
-          { role: 'user', content: message }
-        ],
+        messages: [{ role: 'user', content: message }],
         max_tokens: 2000,
         temperature: 0.7,
         system: SYSTEM_PROMPT
@@ -50,7 +59,6 @@ async function callMiniMax(message) {
 
   const data = await response.json();
   const content = data?.content?.[0]?.text;
-  
   return content || 'Ошибка';
 }
 
