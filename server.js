@@ -13,8 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 // === НАСТРОЙКИ (вставит скилл) ===
-const API_KEY = "{{API_KEY}}";        // MiniMax API Key
-const GROUP_ID = "{{GROUP_ID}}";      // Group ID
+const API_KEY = "{{API_KEY}}";        // MiniMax API Key (только ключ, Group ID не нужен!)
 const KNOWLEDGE = `{{KNOWLEDGE}}`;   // Данные об услугах
 
 const SYSTEM_PROMPT = `Ты консультант по услугам. 
@@ -30,7 +29,7 @@ ${KNOWLEDGE}`;
 
 async function callMiniMax(message) {
   const response = await fetch(
-    `https://api.minimax.chat/v1/text/chatcompletion_v2?GroupId=${GROUP_ID}`,
+    `https://api.minimax.io/anthropic/v1/messages`,
     {
       method: 'POST',
       headers: {
@@ -40,23 +39,19 @@ async function callMiniMax(message) {
       body: JSON.stringify({
         model: 'MiniMax-M2.5',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: message }
         ],
         max_tokens: 2000,
-        temperature: 0.7
+        temperature: 0.7,
+        system: SYSTEM_PROMPT
       })
     }
   );
 
   const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
+  const content = data?.content?.[0]?.text;
   
-  if (typeof content === 'string') return content;
-  if (Array.isArray(content)) {
-    return content.filter(i => i.type === 'text').map(i => i.text).join('');
-  }
-  return 'Ошибка';
+  return content || 'Ошибка';
 }
 
 app.post('/api/chat', async (req, res) => {

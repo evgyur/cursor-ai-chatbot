@@ -233,7 +233,6 @@
     
     <div id="api-key-section" class="ai-api-key-input" style="display: none;">
       <input type="password" id="api-key" placeholder="Введите MiniMax API Key">
-      <input type="text" id="group-id" placeholder="Group ID">
       <button onclick="saveApiKey()">Сохранить и продолжить</button>
     </div>
     
@@ -256,10 +255,8 @@
 (function() {
   const config = window.aiChatConfig || {};
   const STORAGE_KEY = 'aiChat_apiKey';
-  const GROUP_KEY = 'aiChat_groupId';
   
   let apiKey = localStorage.getItem(STORAGE_KEY);
-  let groupId = localStorage.getItem(GROUP_KEY);
   
   // Установить заголовок
   if (config.chatTitle) {
@@ -286,13 +283,10 @@
   
   window.saveApiKey = function() {
     const keyInput = document.getElementById('api-key');
-    const groupInput = document.getElementById('group-id');
     
-    if (keyInput.value && groupInput.value) {
+    if (keyInput.value) {
       apiKey = keyInput.value;
-      groupId = groupInput.value;
       localStorage.setItem(STORAGE_KEY, apiKey);
-      localStorage.setItem(GROUP_KEY, groupId);
       document.getElementById('api-key-section').style.display = 'none';
       addMessage(config.welcomeMessage || 'Здравствуйте! Чем могу помочь?', 'assistant');
     }
@@ -322,8 +316,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: message,
-          apiKey: apiKey,
-          groupId: groupId
+          apiKey: apiKey
         })
       });
       
